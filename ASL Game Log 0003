@@ -297,10 +297,7 @@ def report_all():
 
 
 
-
-
-# Commands
-
+#Main Program
 #Create Game Log db file if none exists
 con=sqlite3.connect('ASLgamelog.db')
 cur=con.cursor()
@@ -313,15 +310,7 @@ if (cur.fetchone()[0])<1:
     print("Creating a gamelog table")
     create_table()
 
-#MENU: Input Records
-# Record=input_record()
-# add_record(Record)
-# report_all()
-# export_csv()
-
-#MENU: Delete Records
-# Record=input_record()
-# delete_record(Record)
+#Calling up the Command Menu
 repeat=True
 while repeat==True:
     command_menu()
