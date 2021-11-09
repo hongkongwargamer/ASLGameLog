@@ -31,7 +31,7 @@ def command_menu():
     print("Press 1: Show all records")
     print("Press 2: Input record")
     print("Press 3: Delete record")
-    print("")
+    print("Press *: See Credits")
     command=input("Input command: ")
     repeat=True
     while repeat:
@@ -50,8 +50,11 @@ def command_menu():
             Record=input_record()
             delete_record(Record)
             repeat=False
+        elif command=="*":
+            print_credits()
+            repeat=False
         else:
-            repeat=True
+            return
     return
     
 
@@ -255,6 +258,7 @@ def export_csv():
 # Query Data by End Date Range
 
 
+
 # Query Data by Opponent Name
  
 
@@ -294,7 +298,15 @@ def report_all():
 
 # Report Games that are Playtesting
 
-
+# Print credits
+def print_credits():
+    print("")
+    print("")
+    print("Created by HongKongWargamer, 12 Aug 2021, Oxford")
+    print("Creator provides NO guarantees.  Use at your own risk.")
+    print("hongkongwargamer@disroot.org")
+    print("hongkongwargamer.com")
+    print("@HWargamer")
 
 
 #Main Program
