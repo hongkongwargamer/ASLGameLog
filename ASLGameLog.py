@@ -136,13 +136,18 @@ def input_record():
     side_played=""
     while side_played=="":
         side_played=input("Which nationality did you play? ")
-    
-    #Attacker/ Defender?  Check input
-    valid=False
-    while valid==False:
-        attack_defender=input("Were you the Attacker/ Defender? ")
+
+    # this 'input' command works for Python 3
+    # if you're using Python 2, use 'raw_input' instead of 'input'
+    while True:
+        attack_defender = input("Were you the Attacker/ Defender? ")
         if attack_defender in ["Attacker", "Defender"]:
-            valid=True
+            # we've got valid input! Break out of our 'while True' loop.
+            break
+        else:
+            # invalid input. Loops back and asks again.
+            print("Sorry, you must enter either Attacker or Defender.")
+            continue
 
     #Start date?  Date validation
     valid=False
