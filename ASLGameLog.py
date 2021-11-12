@@ -168,18 +168,32 @@ def input_record():
                 finish_date=datetime.strptime(finish_date,date_format)
 
     #Win/Lost/Draw/Hold/Abandon?  Check input
-    valid=False
-    while valid==False:
+    while True:
         result=input("Won/Lost/Draw/Hold/Abdn/PT ")
-        if result in ["Won", "Lost", "Draw", "Hold", "Abdn", "PT"]:
-            valid=True
+        if result in ["Won","Lost","Draw","Hold","Abdn","PT"]:
+            break
+        else:
+            print("Sorry, results are confined to Won/Lost/Draw/Hold/Abdn/PT.")
+            continue
+    # valid=False
+    # while valid==False:
+    #     result=input("Won/Lost/Draw/Hold/Abdn/PT ")
+    #     if result in ["Won", "Lost", "Draw", "Hold", "Abdn", "PT"]:
+    #         valid=True
 
     #Live/VASL/PBeM?  Check input
-    valid=False
-    while valid==False:
-        format=input("FtF/VASL/PBeM ")
-        if format in ["FtF", "VASL", "PBeM"]:
-            valid=True
+    while True:
+        format=input("FtF/VASL/PBeM")
+        if format in ["FtF","VASL","PBeM"]:
+            break
+        else:
+            print("Sorry, formats are confined to FtF, VASL or PBeM.")
+            continue
+    # valid=False
+    # while valid==False:
+    #     format=input("FtF/VASL/PBeM ")
+    #     if format in ["FtF", "VASL", "PBeM"]:
+    #         valid=True
 
     #Create an instance of PlayRecord
     Record = PlayRecord(scen_id,scen_name,opponent_fn,opponent_ln,side_played,attack_defender,start_date,finish_date,result,format)
