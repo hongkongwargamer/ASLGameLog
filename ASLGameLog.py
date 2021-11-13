@@ -40,37 +40,27 @@ def command_menu():
     if command=="1":
         #Show all records
         report_all()
-        return True
     elif command=="2":
         #Add record
         Record=input_record()
         add_record(Record)
         report_all()
-        return True
     elif command=="3":
         #Delete record
         Record=input_record()
         delete_record(Record)
-        return True
     elif command=="4":
         #Query by Year
         query_date_range()
-        return True
     elif command=="9":
         #Export to CSV
         export_csv()
-        return True
     elif command=="*":
         print_credits()
-        return True
     elif command=="End":
         export_csv()
         return False
-    else:
-        return True
-    return
-    
-
+    return True
 
 
 #Create table
@@ -216,17 +206,12 @@ def add_record(Record):
         cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND opponent_ln=? AND attack_defender=? AND finish_date=?", (Record.scen_id, Record.opponent_ln, Record.attack_defender,Record.finish_date.date()))
         if len(str(cur.fetchone())) >5:
             print("This play record already exists. Not saving it.")
-            return
         else:
             cur.execute("INSERT INTO gamelog VALUES(?,?,?,?,?,?,?,?,?,?)",(Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result,Record.format))
             con.commit()
             print("Game record saved")
             print("")
             con.close
-            return
-    else:
-        return
-    return
 
 # Delete Record after seeking user confirmation
 def delete_record(Record):
@@ -251,9 +236,6 @@ def delete_record(Record):
         cur.execute("DELETE FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
         con.commit()
         report_all()
-    else:
-        return
-    return
 
 # Query Data by Start Date Range
 def query_table(Search_Field, Search_String):
