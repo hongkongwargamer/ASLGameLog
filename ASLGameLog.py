@@ -1,6 +1,7 @@
+#!/bin/env python3
+
 import sqlite3
 from datetime import datetime, timedelta
-from numpy import record
 from prettytable import prettytable
 from prettytable import from_db_cursor
 import pandas as pd
