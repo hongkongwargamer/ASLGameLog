@@ -1,3 +1,4 @@
 #Files to not track
 License
 README.md
+requirements.txt
