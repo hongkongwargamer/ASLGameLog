@@ -1,2 +1,1 @@
-pandas
-prettytable
+# Requirements: sqlite3, datetime, numpy, prettytable, pandas
