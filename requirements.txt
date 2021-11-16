@@ -1,1 +1,1 @@
-# Requirements: sqlite3, datetime, numpy, prettytable, pandas
+# Requirements: sqlite3, datetime, prettytable, pandas
