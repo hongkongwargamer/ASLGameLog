@@ -62,7 +62,7 @@ def command_menu():
     elif command=="*":
         print_credits()
         return True
-    elif command=="End":
+    elif command.lower()=="end":
         export_csv()
         return False
     else:
@@ -106,6 +106,11 @@ def input_record():
     scen_name=""
     while scen_id=="":
         scen_id=input("Enter Scenario ID: ")
+        if len(scen_id) > 8:
+            print("Your Scenario ID seems to be too long?")
+            scen_id=""
+        else:
+            pass
     while scen_name=="":
         scen_name=input("Enter Scenario Name: ")
 
@@ -117,6 +122,7 @@ def input_record():
     opponent_fn=""
     while opponent_fn=="":
         opponent_fn=input("Enter your Opponent's First Name: ")
+
     
     #List existing last names & ask for input
     net_ln={}
@@ -126,6 +132,7 @@ def input_record():
     opponent_ln=""
     while opponent_ln=="":
         opponent_ln=input("Enter your Opponent's Last Name: ")
+        opponent_ln=opponent_ln.capitalize()
     
     #List existing nationalities & ask for input
     net_nat={}
@@ -140,7 +147,8 @@ def input_record():
     # if you're using Python 2, use 'raw_input' instead of 'input'
     while True:
         attack_defender = input("Were you the Attacker/ Defender? ")
-        if attack_defender in ["Attacker", "Defender"]:
+        if attack_defender.lower() in ["attacker", "defender"]:
+            attack_defender=attack_defender.capitalize()
             # we've got valid input! Break out of our 'while True' loop.
             break
         else:
@@ -169,30 +177,32 @@ def input_record():
     #Win/Lost/Draw/Hold/Abandon?  Check input
     while True:
         result=input("Won/Lost/Draw/Hold/Abdn/PT ")
-        if result in ["Won","Lost","Draw","Hold","Abdn","PT"]:
+        if result.lower() in ["won","lost","draw","hold","abdn","pt"]:
+            result=result.capitalize()
+            if result == "Pt":
+                result = result.upper()
+            else:
+                break
             break
         else:
             print("Sorry, results are confined to Won/Lost/Draw/Hold/Abdn/PT.")
             continue
-    # valid=False
-    # while valid==False:
-    #     result=input("Won/Lost/Draw/Hold/Abdn/PT ")
-    #     if result in ["Won", "Lost", "Draw", "Hold", "Abdn", "PT"]:
-    #         valid=True
 
     #Live/VASL/PBeM?  Check input
     while True:
         format=input("FtF/VASL/PBeM")
-        if format in ["FtF","VASL","PBeM"]:
+        if format.lower() in ["ftf","vasl","pbem"]:
+            if format.lower() == "ftf":
+                format="FtF"
+            elif format.lower() == "vasl":
+                format="VASL"
+            elif format.lower() == "pbem":
+                format="PBeM"
+            
             break
         else:
             print("Sorry, formats are confined to FtF, VASL or PBeM.")
             continue
-    # valid=False
-    # while valid==False:
-    #     format=input("FtF/VASL/PBeM ")
-    #     if format in ["FtF", "VASL", "PBeM"]:
-    #         valid=True
 
     #Create an instance of PlayRecord
     Record = PlayRecord(scen_id,scen_name,opponent_fn,opponent_ln,side_played,attack_defender,start_date,finish_date,result,format)
