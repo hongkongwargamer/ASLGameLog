@@ -2,7 +2,6 @@ import sqlite3
 from datetime import datetime, timedelta
 from prettytable import prettytable
 from prettytable import from_db_cursor
-# import pandas as pd
 import csv
 
 #Advanced Squad Leader game logging program by HongKongWargamer
@@ -264,32 +263,18 @@ def query_table(Search_Field, Search_String):
 
 # Export data to CSV
 def export_csv():
-    # Open the file
-    # f=open('ASLGameLogData.csv','w')
-    # Create a connection and get a cursor
     con=sqlite3.connect('ASLgamelog.db')
     cur=con.cursor()
     # Execute the query
     cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog")
-    with open("ASLGameLogData.csv","w",newline='\n') as csv_file:
+    export_file=cur.fetchall()
+
+    with open("ASLGameLogData.csv","w") as csv_file:
         csv_writer=csv.writer(csv_file, dialect='excel')
-        csv_writer.writerow([i[0] for i in cur.description])
-        csv_writer.writerow(cur)
         
-    # # Get Header Names (without tuples)
-    # colnames=[desc[0] for desc in cur.description]
-    # # Get data in batches
-    # while True:
-    #     # Read the data
-    #     df=pd.DataFrame(cur.fetchall())
-    #     # We are done if there are no data
-    #     if len(df)==0:
-    #         break
-    #     # Let's write to the file
-    #     else:
-    #         df.to_csv(f, header=colnames)
-    # # Clean up
-    # f.close()
+        for line in export_file:
+            csv_writer.writerow(line)
+        
     cur.close()
     con.close()
 
