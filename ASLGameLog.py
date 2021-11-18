@@ -35,7 +35,7 @@ def command_menu():
     print("Press 9: Export to CSV")
     print("Press *: See Credits")
     print("Type \"End\": Exit the system")
-    command=input("Input command: ")
+    command=input("Input command: ").lower()
     if command=="1":
         #Show all records
         report_all()
@@ -62,7 +62,7 @@ def command_menu():
     elif command=="*":
         print_credits()
         return True
-    elif command=="End":
+    elif command=="end":
         export_csv()
         return False
     else:
@@ -378,7 +378,7 @@ def print_credits():
 con=sqlite3.connect('ASLgamelog.db')
 cur=con.cursor()
 
-#Create Table if needed 
+#Create Table if needed
 #Check if a table exists, if not, creates 'gamelog' Table
 cur.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='gamelog' ")
 if (cur.fetchone()[0])<1:
@@ -388,8 +388,6 @@ if (cur.fetchone()[0])<1:
 #Calling up the Command Menu
 
 while command_menu():
-    command_menu()
+    pass
 
 con.close()
-
-
