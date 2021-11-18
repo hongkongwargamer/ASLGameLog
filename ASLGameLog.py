@@ -6,10 +6,11 @@ import csv
 
 #Advanced Squad Leader game logging program by HongKongWargamer
 #Started 12 August 2021 Oxford UK
-date_format='%Y-%m-%d'
+DATE_FORMAT='%Y-%m-%d'
 
-#Class for each record, for flexibility
+
 class PlayRecord:
+    """Class for each record, for flexibility."""
     def __init__(self,scen_id,scen_name,opponent_fn,opponent_ln,side_played,attack_defender,start_date,finish_date,result,format):
         self.scen_id=scen_id
         self.scen_name=scen_name
@@ -22,11 +23,69 @@ class PlayRecord:
         self.result=result
         self.format=format
 
+    def as_tuple(self):
+        return (
+            self.scen_id,
+            self.scen_name,
+            self.opponent_fn,
+            self.opponent_ln,
+            self.side_played,
+            self.attack_defender,
+            self.start_date,
+            self.finish_date,
+            self.result,
+            self.format,
+            )
+
+    def as_table(self):
+        x = prettytable.PrettyTable()
+        x.field_names = ["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
+        x.add_row(self.as_tuple())
+        return x
+
+
+def input_confirmation(prompt):
+    """Prompt user to confirm Y/N."""
+    valid_answers = ['y', 'n', 'yes', 'no']
+    answer = None
+    while answer not in valid_answers:
+        answer = input("{} Y/N ".format(prompt)).lower()
+    return answer in ['y', 'yes']
+
+
+def input_date(prompt):
+    """Prompt user to enter date."""
+    answer = None
+    while not answer:
+        try:
+            answer = datetime.strptime(input("{} YYYY-MM-DD ".format(prompt)), DATE_FORMAT).date()
+        except ValueError:
+            answer = None
+    return answer
+
+
+def input_multiple_choice(prompt, valid_answers):
+    """Prompt user to select one of multiple choices."""
+    text = "/".join(valid_answers)
+    answer = None
+    while answer not in valid_answers:
+        answer = input("{} {}? ".format(prompt, text))
+        if answer not in valid_answers:
+            print("Sorry, answers are confined to {}.".format(text))
+    return answer
+
+
+def input_string(prompt):
+    """Prompt user to enter text."""
+    answer = None
+    while not answer:
+        answer = input("{} ".format(prompt))
+    return answer
+
+
 #Command Menu
 def command_menu():
-    print("")
-    print("")
-    print("Advanced Squad Leader Game Log 1.0")
+    print("\nAdvanced Squad Leader Game Log 1.0")
     print("==================================")
     print("Press 1: Show all records")
     print("Press 2: Input record")
@@ -35,21 +94,22 @@ def command_menu():
     print("Press 9: Export to CSV")
     print("Press *: See Credits")
     print("Type \"End\": Exit the system")
-    command=input("Input command: ")
+    command=input("Input command: ").lower()
     if command=="1":
         #Show all records
         report_all()
         return True
     elif command=="2":
         #Add record
-        Record=input_record()
-        add_record(Record)
+        record=input_record()
+        add_record(record)
         report_all()
         return True
     elif command=="3":
         #Delete record
-        Record=input_record()
-        delete_record(Record)
+        record=input_record()
+        delete_record(record)
+        report_all()
         return True
     elif command=="4":
         #Query by Year
@@ -62,7 +122,7 @@ def command_menu():
     elif command=="*":
         print_credits()
         return True
-    elif command=="End":
+    elif command=="end":
         export_csv()
         return False
     else:
@@ -72,193 +132,117 @@ def command_menu():
 
 
 
-#Create table
+#Create Table if needed
 def create_table():
-    cur.execute("""CREATE TABLE gamelog (
+    #Check if a table exists, if not, creates 'gamelog' Table
+    cur=con.cursor()
+    cur.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='gamelog' ")
+    if (cur.fetchone()[0])<1:
+        print("Creating a gamelog table")
+        cur.execute("""CREATE TABLE gamelog (
                 scen_id text,
                 scen_name text,
                 opponent_fn text,
                 opponent_ln text,
                 side_played text,
                 attack_defender text,
-                start_date text,
-                finish_date text,
+                start_date date,
+                finish_date date,
                 result text,
                 format text
                 )""")
 
-#Input Records
-def input_record():
 
-    #Date Validation
-    def validate_date(d):
-        try:
-            datetime.strptime(d, date_format)
-            return True
-        except ValueError:
-            return False
+def record_count():
+    cur=con.cursor()
+    cur.execute("SELECT count(*) FROM gamelog")
+    return cur.fetchone()[0]
+
+
+#Input PlayRecord
+def input_record():
+    cur=con.cursor()
+    print("\n\nEntering Details of the Game .....")
 
     #Getting scenario ID and name
-    print("")
-    print("")
-    print("Entering Details of the Game .....")
-    scen_id=""
-    scen_name=""
-    while scen_id=="":
-        scen_id=input("Enter Scenario ID: ")
-    while scen_name=="":
-        scen_name=input("Enter Scenario Name: ")
+    scen_id = input_string("Enter Scenario ID:")
+    scen_name = input_string("Enter Scenario Name:")
 
     #List existing first names & ask for input
-    net_fn={}
-    cur.execute("SELECT opponent_fn FROM gamelog")
-    net_fn=set(cur.fetchall())
-    print("Existing opponent first names: {}".format(net_fn))
-    opponent_fn=""
-    while opponent_fn=="":
-        opponent_fn=input("Enter your Opponent's First Name: ")
-    
+    cur.execute("SELECT DISTINCT opponent_fn FROM gamelog")
+    print("Existing opponent first names: {}".format("/".join(x[0] for x in cur.fetchall())))
+    opponent_fn = input_string("Enter your Opponent's First Name:")
+
     #List existing last names & ask for input
-    net_ln={}
-    cur.execute("SELECT opponent_ln FROM gamelog")
-    net_ln=set(cur.fetchall())
-    print("Existing opponent last names: {}".format(net_ln))
-    opponent_ln=""
-    while opponent_ln=="":
-        opponent_ln=input("Enter your Opponent's Last Name: ")
-    
+    cur.execute("SELECT DISTINCT opponent_ln FROM gamelog")
+    print("Existing opponent last names: {}".format("/".join(x[0] for x in cur.fetchall())))
+    opponent_ln = input_string("Enter your Opponent's Last Name:")
+
     #List existing nationalities & ask for input
-    net_nat={}
-    cur.execute("SELECT side_played FROM gamelog")
-    net_nat=set(cur.fetchall())
-    print("Existing nationalities in database: {}".format(net_nat))
-    side_played=""
-    while side_played=="":
-        side_played=input("Which nationality did you play? ")
+    cur.execute("SELECT DISTINCT side_played FROM gamelog")
+    print("Existing nationalities in database: {}".format("/".join(x[0] for x in cur.fetchall())))
+    side_played = input_string("Which nationality did you play?")
 
-    # this 'input' command works for Python 3
-    # if you're using Python 2, use 'raw_input' instead of 'input'
-    while True:
-        attack_defender = input("Were you the Attacker/ Defender? ")
-        if attack_defender in ["Attacker", "Defender"]:
-            # we've got valid input! Break out of our 'while True' loop.
-            break
-        else:
-            # invalid input. Loops back and asks again.
-            print("Sorry, you must enter either Attacker or Defender.")
-            continue
+    attack_defender = input_multiple_choice("Were you the", ("Attacker", "Defender"))
 
-    #Start date?  Date validation
-    valid=False
-    while valid==False:
-        start_date=input("Start date? YYYY-MM-DD ")
-        valid=validate_date(start_date)
-    start_date=datetime.strptime(start_date,date_format)
+    #Start date?
+    start_date = input_date("Start date?")
 
-    #End date?  Date validation
-    finish_date=datetime.strptime("1990-01-01",date_format)
-        #Finish date should be after start date
-    while finish_date<start_date:
-        valid=False
-        while valid==False:
-            finish_date=input("Finish date? YYYY-MM-DD ")
-            valid=validate_date(finish_date)
-            if valid:
-                finish_date=datetime.strptime(finish_date,date_format)
+    #Finish date? Finish date must be after start date.
+    finish_date = datetime.strptime("1000-1-1", DATE_FORMAT).date()
+    while (not finish_date) or finish_date < start_date:
+        finish_date = input_date("Finish date?")
+        if finish_date < start_date:
+            finish_date = datetime.strptime("1000-1-1", DATE_FORMAT).date()
 
-    #Win/Lost/Draw/Hold/Abandon?  Check input
-    while True:
-        result=input("Won/Lost/Draw/Hold/Abdn/PT ")
-        if result in ["Won","Lost","Draw","Hold","Abdn","PT"]:
-            break
-        else:
-            print("Sorry, results are confined to Won/Lost/Draw/Hold/Abdn/PT.")
-            continue
-    # valid=False
-    # while valid==False:
-    #     result=input("Won/Lost/Draw/Hold/Abdn/PT ")
-    #     if result in ["Won", "Lost", "Draw", "Hold", "Abdn", "PT"]:
-    #         valid=True
+    #Win/Lost/Draw/Hold/Abandon?
+    game_result = input_multiple_choice("Result", ("Won", "Lost", "Draw", "Hold", "Abdn", "PT"))
 
-    #Live/VASL/PBeM?  Check input
-    while True:
-        format=input("FtF/VASL/PBeM")
-        if format in ["FtF","VASL","PBeM"]:
-            break
-        else:
-            print("Sorry, formats are confined to FtF, VASL or PBeM.")
-            continue
-    # valid=False
-    # while valid==False:
-    #     format=input("FtF/VASL/PBeM ")
-    #     if format in ["FtF", "VASL", "PBeM"]:
-    #         valid=True
+    #Live/VASL/PBeM?
+    game_format = input_multiple_choice("Format", ("FtF","VASL","PBeM"))
 
-    #Create an instance of PlayRecord
-    Record = PlayRecord(scen_id,scen_name,opponent_fn,opponent_ln,side_played,attack_defender,start_date,finish_date,result,format)
-    return Record
+    #Create and return instance of PlayRecord
+    return PlayRecord(scen_id,scen_name,opponent_fn,opponent_ln,side_played,attack_defender,start_date,finish_date,game_result,game_format)
 
-#Add Record after seeking user confirmation & looking for duplicates
-def add_record(Record):
+
+#Add PlayRecord after seeking user confirmation & looking for duplicates
+def add_record(record):
     # Add a record to the table via an instance of PlayRecord
-    print(" ")
-    print(" ")
-    col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
-    x=prettytable.PrettyTable()
-    x.field_names=col_names
-    x.add_row([Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result, Record.format])
-    print(x)
-
-    user_okay=input("Save to Log? (Y/N) ")
-    if user_okay=="Y":
-            # Check to see if there's a duplicate, if not, commit 
-        cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND opponent_ln=? AND attack_defender=? AND finish_date=?", (Record.scen_id, Record.opponent_ln, Record.attack_defender,Record.finish_date.date()))
-        if len(str(cur.fetchone())) >5:
-            print("This play record already exists. Not saving it.")
-            return
-        else:
-            cur.execute("INSERT INTO gamelog VALUES(?,?,?,?,?,?,?,?,?,?)",(Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result,Record.format))
-            con.commit()
-            print("Game record saved")
-            print("")
-            con.close
-            return
-    else:
+    cur=con.cursor()
+    print("\n")
+    print(record.as_table())
+    # Check to see if there's a duplicate.
+    cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND opponent_ln=? AND attack_defender=? AND finish_date=?", (record.scen_id, record.opponent_ln, record.attack_defender,record.finish_date))
+    if cur.fetchone():
+        print("This play record already exists. Not saving it.")
         return
-    return
+    if input_confirmation("Save to Log?"):
+        cur.execute("INSERT INTO gamelog VALUES(?,?,?,?,?,?,?,?,?,?)", record.as_tuple())
+        con.commit()
+        print("Game record saved.")
 
-# Delete Record after seeking user confirmation
-def delete_record(Record):
-    print(" ")
-    print(" ")
-    cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
+
+# Delete PlayRecord after seeking user confirmation
+def delete_record(record):
+    cur=con.cursor()
+    print("\n")
+    print(record.as_table())
+    cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (record.scen_id, record.scen_name, record.opponent_fn, record.opponent_ln, record.side_played, record.attack_defender, record.result, record.start_date.date(), record.finish_date.date(), record.result, record.format))
     del_record=cur.fetchone()
-    if del_record:
-        col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
-        x=prettytable.PrettyTable()
-        x.field_names=col_names
-        x.add_row(del_record)
-        print(x)
-        print("")
-        print("Found the above for deletion")
-    else:
+    if not del_record:
         print("This record doesn't exist")
         return
+    print("\nFound the above for deletion")
 
-    user_okay=input("Delete this Record? (Y/N) ")
-    if user_okay=="Y":
-        cur.execute("DELETE FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
+    if input_confirmation("Delete this record?"):
+        cur.execute("DELETE FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (record.scen_id, record.scen_name, record.opponent_fn, record.opponent_ln, record.side_played, record.attack_defender, record.result, record.start_date.date(), record.finish_date.date(), record.result, record.format))
         con.commit()
-        report_all()
-    else:
-        return
-    return
+
 
 # Query Data by Start Date Range
-def query_table(Search_Field, Search_String):
-    Field=Search_Field
-    String=Search_String
-    cur.execute("SELECT * FROM gamelog WHERE Field=String")
+def query_table(field, search):
+    cur=con.cursor()
+    cur.execute("SELECT * FROM gamelog WHERE {}=?".format(field), (search, ))
     print(cur.fetchall())
 
 # Export data to CSV
@@ -280,42 +264,17 @@ def export_csv():
 
 # Query Data by Date Range
 def query_date_range():
-
-    #date validation
-    def validate_date(d):
-        try:
-            datetime.strptime(d, date_format)
-            return True
-        except ValueError:
-            return False
-
+    cur=con.cursor()
     print("\n\nQuery by Dates:")
-    #Start date?  Date validation
-    valid=False
-    while valid==False:
-        query_start_date=input("Start date? YYYY-MM-DD ")
-        valid=validate_date(query_start_date)
-    query_start_date=datetime.strptime(query_start_date,date_format)
-
-    #End date?  Date validation
-    query_finish_date=datetime.strptime("1990-01-01",date_format)
-        #Finish date should be after start date
-    while query_finish_date<query_start_date:
-        valid=False
-        while valid==False:
-            query_finish_date=input("Finish date? YYYY-MM-DD ")
-            valid=validate_date(query_finish_date)
-            if valid:
-                query_finish_date=datetime.strptime(query_finish_date,date_format)
-    cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog WHERE finish_date BETWEEN ? AND ?",(query_start_date,query_finish_date))
-    query_results=cur.fetchall()
-    col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
-    x=prettytable.PrettyTable()
-    x.field_names=col_names
-    for query_result in query_results:
-        x.add_row(query_result)
-    print(x)
-    print("")
+    start_date = input_date("Start date?")
+    #Finish date? Finish date must be after start date.
+    finish_date = datetime.strptime("1000-1-1", DATE_FORMAT).date()
+    while (not finish_date) or finish_date < start_date:
+        finish_date = input_date("Finish date?")
+        if finish_date < start_date:
+            finish_date = datetime.strptime("1000-1-1", DATE_FORMAT).date()
+    cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog WHERE finish_date BETWEEN ? AND ?",(start_date,finish_date))
+    report_all(cur)
 
 
 
@@ -339,13 +298,11 @@ def query_date_range():
 
 
 
-
-
 # REPORT ALL DATA
-def report_all():
-    # con=sqlite3.connect('ASLgamelog.db')
-    # cur=con.cursor()
-    cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog")
+def report_all(cur=None):
+    if cur is None:
+        cur=con.cursor()
+        cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog")
     mytable = from_db_cursor(cur)
     mytable.align["scen_id"]='l'
     mytable.align["scen_name"]='l'
@@ -374,22 +331,17 @@ def print_credits():
 
 
 #Main Program =====================================================
-#Create Game Log db file if none exists
-con=sqlite3.connect('ASLgamelog.db')
-cur=con.cursor()
 
-#Create Table if needed 
-#Check if a table exists, if not, creates 'gamelog' Table
-cur.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='gamelog' ")
-if (cur.fetchone()[0])<1:
-    print("Creating a gamelog table")
+if __name__ == "__main__":
+    con=sqlite3.connect("ASLgamelog.db")
+
+    #Create Game Log db file if none exists
     create_table()
 
-#Calling up the Command Menu
+    print("{} existing records.\n".format(record_count()))
 
-while command_menu():
-    command_menu()
+    #Calling up the Command Menu
+    while command_menu():
+        pass
 
-con.close()
-
-
+    con.close()
