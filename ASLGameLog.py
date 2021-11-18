@@ -24,9 +24,7 @@ class PlayRecord:
 
 #Command Menu
 def command_menu():
-    print("")
-    print("")
-    print("Advanced Squad Leader Game Log 1.0")
+    print("\n\nAdvanced Squad Leader Game Log 1.0")
     print("==================================")
     print("Press 1: Show all records")
     print("Press 2: Input record")
@@ -99,9 +97,7 @@ def input_record():
             return False
 
     #Getting scenario ID and name
-    print("")
-    print("")
-    print("Entering Details of the Game .....")
+    print("\n\nEntering Details of the Game .....")
     scen_id=""
     scen_name=""
     while scen_id=="":
