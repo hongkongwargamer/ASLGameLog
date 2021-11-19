@@ -207,11 +207,12 @@ def input_record():
 #Add Record after seeking user confirmation & looking for duplicates
 def add_record(Record):
     # Add a record to the table via an instance of PlayRecord
-    print(" ")
-    print(" ")
+    print("\n\n")
     col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
     x=prettytable.PrettyTable()
     x.field_names=col_names
+    # add_data=[Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result, Record.format]
+    # pretty_table(add_data)
     x.add_row([Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result, Record.format])
     print(x)
 
@@ -238,14 +239,9 @@ def delete_record(Record):
     print(" ")
     print(" ")
     cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
-    del_record=cur.fetchone()
+    del_record=cur.fetchall()
     if del_record:
-        col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
-        x=prettytable.PrettyTable()
-        x.field_names=col_names
-        x.add_row(del_record)
-        print(x)
-        print("")
+        pretty_table(del_record)
         print("Found the above for deletion")
     else:
         print("This record doesn't exist")
@@ -315,14 +311,16 @@ def query_date_range():
                 query_finish_date=datetime.strptime(query_finish_date,date_format)
     cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog WHERE finish_date BETWEEN ? AND ?",(query_start_date,query_finish_date))
     query_results=cur.fetchall()
+    pretty_table(query_results)
+
+def pretty_table(show_records):
     col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
     x=prettytable.PrettyTable()
     x.field_names=col_names
-    for query_result in query_results:
-        x.add_row(query_result)
+    for show_record in show_records:
+        x.add_row(show_record)
     print(x)
-    print("")
-
+    print("\n")
 
 
 # Query Data by End Date Range
