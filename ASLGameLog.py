@@ -111,30 +111,24 @@ def input_record():
         scen_name=input("Enter Scenario Name: ")
 
     #List existing first names & ask for input
-    net_fn={}
-    cur.execute("SELECT opponent_fn FROM gamelog")
-    net_fn=set(cur.fetchall())
-    print("Existing opponent first names: {}".format(net_fn))
+    cur.execute("SELECT DISTINCT opponent_fn FROM gamelog")
+    print("Existing opponent first names: {}".format(cur.fetchall()))
     opponent_fn=""
     while opponent_fn=="":
         opponent_fn=input("Enter your Opponent's First Name: ")
 
     
     #List existing last names & ask for input
-    net_ln={}
-    cur.execute("SELECT opponent_ln FROM gamelog")
-    net_ln=set(cur.fetchall())
-    print("Existing opponent last names: {}".format(net_ln))
+    cur.execute("SELECT DISTINCT opponent_ln FROM gamelog")
+    print("Existing opponent last names: {}".format(cur.fetchall()))
     opponent_ln=""
     while opponent_ln=="":
         opponent_ln=input("Enter your Opponent's Last Name: ")
         opponent_ln=opponent_ln.capitalize()
     
     #List existing nationalities & ask for input
-    net_nat={}
-    cur.execute("SELECT side_played FROM gamelog")
-    net_nat=set(cur.fetchall())
-    print("Existing nationalities in database: {}".format(net_nat))
+    cur.execute("SELECT DISTINCT side_played FROM gamelog")
+    print("Existing nationalities in database: {}".format(cur.fetchall()))
     side_played=""
     while side_played=="":
         side_played=input("Which nationality did you play? ")
