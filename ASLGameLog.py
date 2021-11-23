@@ -24,7 +24,11 @@ class PlayRecord:
 
 #Command Menu
 def command_menu():
-    print("\n\nAdvanced Squad Leader Game Log 1.0")
+    #Showing a count of the # of records
+    cur.execute("SELECT COUNT(*) FROM gamelog")
+    print("\n\nWe have {} records".format(cur.fetchone()))
+    #The Menu
+    print("\nAdvanced Squad Leader Game Log 1.0")
     print("==================================")
     print("Press 1: Show all records")
     print("Press 2: Input record")
@@ -33,7 +37,7 @@ def command_menu():
     print("Press 9: Export to CSV")
     print("Press *: See Credits")
     print("Type \"End\": Exit the system")
-    command=input("Input command: ")
+    command=input("\nInput command: ")
     if command=="1":
         #Show all records
         report_all()
@@ -180,7 +184,7 @@ def input_record():
 
     #Live/VASL/PBeM?  Check input
     while True:
-        format=input("FtF/VASL/PBeM")
+        format=input("FtF/VASL/PBeM ")
         if format.lower() in ["ftf","vasl","pbem"]:
             if format.lower() == "ftf":
                 format="FtF"
@@ -211,7 +215,7 @@ def add_record(Record):
     print(x)
 
     user_okay=input("Save to Log? (Y/N) ")
-    if user_okay=="Y":
+    if user_okay.lower=="y":
             # Check to see if there's a duplicate, if not, commit 
         cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND opponent_ln=? AND attack_defender=? AND finish_date=?", (Record.scen_id, Record.opponent_ln, Record.attack_defender,Record.finish_date.date()))
         if len(str(cur.fetchone())) >5:
@@ -222,7 +226,7 @@ def add_record(Record):
             con.commit()
             print("Game record saved")
             print("")
-            con.close
+            # con.close
             return
     else:
         return
@@ -232,7 +236,7 @@ def add_record(Record):
 def delete_record(Record):
     print(" ")
     print(" ")
-    cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
+    cur.execute("SELECT FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
     del_record=cur.fetchall()
     if del_record:
         pretty_table(del_record)
@@ -242,11 +246,13 @@ def delete_record(Record):
         return
 
     user_okay=input("Delete this Record? (Y/N) ")
-    if user_okay=="Y":
-        cur.execute("DELETE FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
+    if user_okay.lower=="y":
+        cur.execute("DELETE * FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
         con.commit()
         report_all()
+        print("Record(s) deleted")
     else:
+        print("Nothing deleted")
         return
     return
 
@@ -259,8 +265,8 @@ def query_table(Search_Field, Search_String):
 
 # Export data to CSV
 def export_csv():
-    con=sqlite3.connect('ASLgamelog.db')
-    cur=con.cursor()
+    # con=sqlite3.connect('ASLgamelog.db')
+    # cur=con.cursor()
     # Execute the query
     cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog")
     export_file=cur.fetchall()
@@ -271,8 +277,8 @@ def export_csv():
         for line in export_file:
             csv_writer.writerow(line)
         
-    cur.close()
-    con.close()
+    # cur.close()
+    # con.close()
 
 # Query Data by Date Range
 def query_date_range():
@@ -350,7 +356,9 @@ def report_all():
     mytable.align["opponent_fn"]='l'
     mytable.align["opponent_ln"]='l'
     mytable.align["side_played"]='l'
+    print("")
     print(mytable.get_string(sortby="finish_date"))
+ 
 
 # Report Games by Completed Date Range (W/L) (A/D) (Nationality) (Format)
 
@@ -384,7 +392,6 @@ if (cur.fetchone()[0])<1:
     create_table()
 
 #Calling up the Command Menu
-
 while command_menu():
     command_menu()
 
