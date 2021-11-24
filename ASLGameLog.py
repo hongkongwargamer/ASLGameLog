@@ -215,7 +215,7 @@ def add_record(Record):
     print(x)
 
     user_okay=input("Save to Log? (Y/N) ")
-    if user_okay.lower=="y":
+    if user_okay.lower()=="y":
             # Check to see if there's a duplicate, if not, commit 
         cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND opponent_ln=? AND attack_defender=? AND finish_date=?", (Record.scen_id, Record.opponent_ln, Record.attack_defender,Record.finish_date.date()))
         if len(str(cur.fetchone())) >5:
@@ -236,7 +236,7 @@ def add_record(Record):
 def delete_record(Record):
     print(" ")
     print(" ")
-    cur.execute("SELECT FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
+    cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
     del_record=cur.fetchall()
     if del_record:
         pretty_table(del_record)
@@ -246,8 +246,8 @@ def delete_record(Record):
         return
 
     user_okay=input("Delete this Record? (Y/N) ")
-    if user_okay.lower=="y":
-        cur.execute("DELETE * FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
+    if user_okay.lower()=='y':
+        cur.execute("DELETE FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
         con.commit()
         report_all()
         print("Record(s) deleted")
