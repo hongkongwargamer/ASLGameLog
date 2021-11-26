@@ -232,9 +232,9 @@ def add_record(Record):
 
 # Delete Record after seeking user confirmation
 def delete_record(Record):
-    print(" ")
-    print(" ")
-    cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
+    print("\n\n")
+    search_fields="scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?"
+    cur.execute("SELECT * FROM gamelog WHERE {}".format(search_fields), (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
     del_record=cur.fetchall()
     if del_record:
         pretty_table(del_record)
@@ -245,7 +245,7 @@ def delete_record(Record):
 
     user_okay=input("Delete this Record? (Y/N) ")
     if user_okay.lower()=='y':
-        cur.execute("DELETE FROM gamelog WHERE scen_id=? AND scen_name=? AND opponent_fn=? AND opponent_ln=? AND side_played=? AND attack_defender=? AND result=? AND start_date=? AND finish_date=? AND result=? AND format=?", (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
+        cur.execute("DELETE FROM gamelog WHERE {}".format(search_fields), (Record.scen_id, Record.scen_name, Record.opponent_fn, Record.opponent_ln, Record.side_played, Record.attack_defender, Record.result, Record.start_date.date(), Record.finish_date.date(), Record.result, Record.format))
         con.commit()
         report_all()
         print("Record(s) deleted")
