@@ -206,9 +206,9 @@ def input_record():
 def add_record(Record):
     # Add a record to the table via an instance of PlayRecord
     print("\n\n")
-    col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
+    # col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
     x=prettytable.PrettyTable()
-    x.field_names=col_names
+    x.field_names=column_names.split(",")
     # add_data=[Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result, Record.format]
     # pretty_table(add_data)
     x.add_row([Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result, Record.format])
@@ -229,6 +229,7 @@ def add_record(Record):
             # con.close
             return
     else:
+        print("Okay, not saving this.")
         return
     return
 
@@ -268,7 +269,7 @@ def export_csv():
     # con=sqlite3.connect('ASLgamelog.db')
     # cur=con.cursor()
     # Execute the query
-    cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog")
+    cur.execute("SELECT {} FROM gamelog".format(column_names))
     export_file=cur.fetchall()
 
     with open("ASLGameLogData.csv","w") as csv_file:
@@ -309,14 +310,13 @@ def query_date_range():
             valid=validate_date(query_finish_date)
             if valid:
                 query_finish_date=datetime.strptime(query_finish_date,date_format)
-    cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog WHERE finish_date BETWEEN ? AND ?",(query_start_date,query_finish_date))
+    cur.execute("SELECT {} FROM gamelog WHERE finish_date BETWEEN ? AND ?".format(column_names),(query_start_date,query_finish_date))
     query_results=cur.fetchall()
     pretty_table(query_results)
 
 def pretty_table(show_records):
-    col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
     x=prettytable.PrettyTable()
-    x.field_names=col_names
+    x.field_names=column_names.split(",")
     for show_record in show_records:
         x.add_row(show_record)
     print(x)
@@ -349,7 +349,7 @@ def pretty_table(show_records):
 def report_all():
     # con=sqlite3.connect('ASLgamelog.db')
     # cur=con.cursor()
-    cur.execute("SELECT scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format FROM gamelog")
+    cur.execute("SELECT {} FROM gamelog".format(column_names))
     mytable = from_db_cursor(cur)
     mytable.align["scen_id"]='l'
     mytable.align["scen_name"]='l'
@@ -383,6 +383,11 @@ def print_credits():
 #Create Game Log db file if none exists
 con=sqlite3.connect('ASLgamelog.db')
 cur=con.cursor()
+
+# column_fields=["scen_id","scen_name","opponent_fn","opponent_ln","side_played","attack_defender","start_date","finish_date","result","format"]
+column_names="scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format"
+test=column_names.split(",")
+print(test)
 
 #Create Table if needed 
 #Check if a table exists, if not, creates 'gamelog' Table
