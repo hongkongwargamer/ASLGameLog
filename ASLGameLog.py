@@ -36,7 +36,7 @@ def command_menu():
     print("Press 4: Query by dates")
     print("Press 9: Export to CSV")
     print("Press *: See Credits")
-    print("Type \"End\": Exit the system")
+    print("Type \"End\": End this Session")
     command=input("\nInput command: ")
     if command=="1":
         #Show all records
@@ -206,11 +206,8 @@ def input_record():
 def add_record(Record):
     # Add a record to the table via an instance of PlayRecord
     print("\n\n")
-    # col_names=["scen_id", "scen_name", "opponent_fn", "opponent_ln", "side_played", "attack_defender", "start_date", "finish_date", "result", "format"]
     x=prettytable.PrettyTable()
     x.field_names=column_names.split(",")
-    # add_data=[Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result, Record.format]
-    # pretty_table(add_data)
     x.add_row([Record.scen_id,Record.scen_name,Record.opponent_fn,Record.opponent_ln,Record.side_played,Record.attack_defender,Record.start_date.strftime(date_format),Record.finish_date.strftime(date_format),Record.result, Record.format])
     print(x)
 
@@ -266,9 +263,6 @@ def query_table(Search_Field, Search_String):
 
 # Export data to CSV
 def export_csv():
-    # con=sqlite3.connect('ASLgamelog.db')
-    # cur=con.cursor()
-    # Execute the query
     cur.execute("SELECT {} FROM gamelog".format(column_names))
     export_file=cur.fetchall()
 
@@ -277,9 +271,6 @@ def export_csv():
         
         for line in export_file:
             csv_writer.writerow(line)
-        
-    # cur.close()
-    # con.close()
 
 # Query Data by Date Range
 def query_date_range():
@@ -347,8 +338,6 @@ def pretty_table(show_records):
 
 # REPORT ALL DATA
 def report_all():
-    # con=sqlite3.connect('ASLgamelog.db')
-    # cur=con.cursor()
     cur.execute("SELECT {} FROM gamelog".format(column_names))
     mytable = from_db_cursor(cur)
     mytable.align["scen_id"]='l'
@@ -384,10 +373,7 @@ def print_credits():
 con=sqlite3.connect('ASLgamelog.db')
 cur=con.cursor()
 
-# column_fields=["scen_id","scen_name","opponent_fn","opponent_ln","side_played","attack_defender","start_date","finish_date","result","format"]
 column_names="scen_id, scen_name, opponent_fn, opponent_ln, side_played, attack_defender, start_date, finish_date, result, format"
-test=column_names.split(",")
-print(test)
 
 #Create Table if needed 
 #Check if a table exists, if not, creates 'gamelog' Table
