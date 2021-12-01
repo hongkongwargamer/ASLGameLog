@@ -8,6 +8,7 @@ import csv
 #Started 12 August 2021
 DATE_FORMAT='%Y-%m-%d'
 
+
 #Class for each record, for flexibility
 class PlayRecord:
     def __init__(self,scen_id,scen_name,opponent_fn,opponent_ln,side_played,attack_defender,start_date,finish_date,result,format):
@@ -21,6 +22,7 @@ class PlayRecord:
         self.finish_date=finish_date
         self.result=result
         self.format=format
+
 
 #Command Menu
 def command_menu():
@@ -71,10 +73,7 @@ def command_menu():
         return False
     else:
         return True
-    return
     
-
-
 
 #Create table
 def create_table():
@@ -90,6 +89,7 @@ def create_table():
                 result text,
                 format text
                 )""")
+
 
 #Input Records
 def input_record():
@@ -204,6 +204,7 @@ def input_record():
     record = PlayRecord(scen_id,scen_name,opponent_fn,opponent_ln,side_played,attack_defender,start_date,finish_date,result,format)
     return record
 
+
 #Add Record after seeking user confirmation & looking for duplicates
 def add_record(record):
     # Add a record to the table via an instance of PlayRecord
@@ -219,17 +220,13 @@ def add_record(record):
         cur.execute("SELECT * FROM gamelog WHERE scen_id=? AND opponent_ln=? AND attack_defender=? AND finish_date=?", (record.scen_id, record.opponent_ln, record.attack_defender,record.finish_date.date()))
         if len(str(cur.fetchone())) >5:
             print("This play record already exists. Not saving it.")
-            return
         else:
             cur.execute("INSERT INTO gamelog VALUES(?,?,?,?,?,?,?,?,?,?)",(record.scen_id,record.scen_name,record.opponent_fn,record.opponent_ln,record.side_played,record.attack_defender,record.start_date.strftime(DATE_FORMAT),record.finish_date.strftime(DATE_FORMAT),record.result,record.format))
             con.commit()
             print("New game record saved\n")
-            # con.close
-            return
     else:
         print("Okay, not saving this.")
-        return
-    return
+
 
 # Delete Record after seeking user confirmation
 def delete_record(record):
@@ -252,8 +249,7 @@ def delete_record(record):
         print("\nRecord(s) deleted\n")
     else:
         print("\nNothing deleted\n")
-        return
-    return
+
 
 # Query Data by Start Date Range
 def query_table(Search_Field, Search_String):
@@ -261,6 +257,7 @@ def query_table(Search_Field, Search_String):
     String=Search_String
     cur.execute("SELECT * FROM gamelog WHERE Field=String")
     print(cur.fetchall())
+
 
 # Export data to CSV
 def export_csv():
@@ -273,6 +270,7 @@ def export_csv():
         for line in export_file:
             csv_writer.writerow(line)
     print("\nGame records exported to CSV\n")
+
 
 # Query Data by Date Range
 def query_date_range():
@@ -307,6 +305,8 @@ def query_date_range():
     query_results=cur.fetchall()
     pretty_table(query_results)
 
+
+# Display tables of results
 def pretty_table(show_records):
     x=prettytable.PrettyTable()
     x.field_names=column_names.split(",")
@@ -337,7 +337,7 @@ def pretty_table(show_records):
 
 
 
-# REPORT ALL DATA
+# Report all data
 def report_all():
     cur.execute("SELECT {} FROM gamelog".format(column_names))
     mytable = from_db_cursor(cur)
@@ -357,6 +357,7 @@ def report_all():
 
 
 # Report Games that are Playtesting
+
 
 # Print credits
 def print_credits():
